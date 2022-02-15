@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 import tkinter as tk
 import tkinter.font
-from tkinter import END, LEFT, RIGHT, ttk
+from tkinter import END, RIGHT, ttk
 import modules
+import pickle
 
 #TITLE_FONT = tkinter.font.Font(family= 'Avantgarde', size=18)
 
@@ -28,7 +29,7 @@ class Main(tk.Frame):
         self.create_widgets()
     
     def create_widgets(self):
-        frame = tk.Frame(self.root, background='green')
+        frame = tk.Frame(self.root)
         frame.grid(row=0,column=0)
         title = tk.Label(frame, text= "Zählerstände" )
         title.grid(row=0 , column= 0)
@@ -76,8 +77,39 @@ class Main(tk.Frame):
             cnt+=1
 
         def save():
-            print('save')
-        
+            #pickleaufbau: 1 liste mit 3 dicts mit je 2 listen einträgen: zählerstände + differences
+            for i, x in enumerate(entries_kitchen):
+                val = int(x.get())
+                if i == 0:
+                    self.kitchen.warm_set(val)
+                elif i == 1:
+                    self.kitchen.cold_set(val)
+                else:
+                    self.kitchen.heater_set(val)
+
+            for i, x in enumerate(entries_bath):
+                val = int(x.get())
+                if i == 0:
+                    self.bath.warm_set(val)
+                elif i == 1:
+                    self.bath.cold_set(val)
+                else:
+                    self.bath.heater_set(val)
+            
+            for i, x in enumerate(einzel_entries):
+                val = int(x.get())
+                if i == 0:
+                    self.user1.heater_set(val)
+                elif i == 1:
+                    self.user2.heater_set(val)
+                else:
+                    self.user3.heater_set(val)
+            
+            final_lis = [self.kitchen.getall(), self.bath.getall(), self.user1.getall(), self.user2.getall(), self.user3.getall()]
+            file = open('aktuelle_stats', 'wb')
+            pickle.dump(final_lis, file)
+            file.close()
+            
         def clear():
             for x in entries_kitchen:
                 x.delete(0,END)
@@ -91,7 +123,7 @@ class Main(tk.Frame):
 
         #buttons
         btn_frame = tk.Frame(self.root,background= 'blue')
-        btn_frame.grid(row=12, column=0)
+        btn_frame.grid(row=12, column=1)
         save_btn = tk.Button(btn_frame, text='Save', background= DARK_USERS, command= save)
         save_btn.grid(row=0,column=0)
         clear_btn = tk.Button(btn_frame, text='Clear', background= DARK_USERS, command= clear)
