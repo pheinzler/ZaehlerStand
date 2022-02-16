@@ -10,6 +10,7 @@ import pickle
 #colours
 DARK_ENTRIES = 'grey50'
 RED = 'red'
+WHITE = 'snow'
 
 #actual color settings
 
@@ -26,13 +27,28 @@ class Main(tk.Frame):
         self.user2 = modules.Zimmer('Simon', 1)
         self.user3 = modules.Zimmer('Jule', 1)
 
+        self.init_stuff()
+        self.heading()
         self.create_widgets()
     
+    def init_stuff(self):
+        self.root.minsize(1200, 325)
+    
+    def heading(self):
+        headerframe = tk.Frame(self.root)
+        headerframe.grid(row=0, column=0)
+        title = tk.Label(headerframe, text= "Zählerstände" )
+        title.grid(row=0 , column= 0, sticky=tk.W)
+
+        months = ['Choose', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
+        combobox = ttk.Combobox(headerframe, background=DARK_USERS, values=months)
+        combobox.grid(row=0, column=1)
+        combobox.current(0)
+
+
     def create_widgets(self):
         frame = tk.Frame(self.root)
-        frame.grid(row=0,column=0)
-        title = tk.Label(frame, text= "Zählerstände" )
-        title.grid(row=0 , column= 0)
+        frame.grid(row=1,column=0)
 
         kitchenlable = tk.Label(frame, text='Kitchen: ')
         kitchenlable.grid(row=2, column=0)
@@ -43,15 +59,15 @@ class Main(tk.Frame):
         lablenames = ['Water Warm:','Water Cold:', 'Heater:']        
         lables_kitchen = [tk.Label(frame, text= i) for i in lablenames]
         lables_bath = [tk.Label(frame, text= i) for i in lablenames]
-        entries_kitchen = [tk.Entry(frame, width=20,background= DARK_USERS,justify=RIGHT) for _ in range(3)]
-        entries_bath = [tk.Entry(frame, width=20, background= DARK_USERS,justify=RIGHT) for _ in range(3)]
+        self.entries_kitchen = [tk.Entry(frame, width=20,background= DARK_USERS,justify=RIGHT) for _ in range(3)]
+        self.entries_bath = [tk.Entry(frame, width=20, background= DARK_USERS,justify=RIGHT) for _ in range(3)]
         kitchenprev= [tk.Label(frame, text= str(self.kitchen.warm)),tk.Label(frame, text= str(self.kitchen.cold)),tk.Label(frame, text= str(self.kitchen.heater))]
         bathprev= [tk.Label(frame, text= str(self.bath.warm)),tk.Label(frame, text= str(self.bath.cold)),tk.Label(frame, text= str(self.bath.heater))]
         
         #labels und entries fuer Einzelzimmer
         einzel_lablenames=['Patrick' , 'Simon' , 'Jule']
         einzel_lables = [tk.Label(frame,text=i) for i in einzel_lablenames]
-        einzel_entries = [tk.Entry(frame, width=20, background=DARK_USERS,justify=RIGHT) for _ in range(3)]
+        self.einzel_entries = [tk.Entry(frame, width=20, background=DARK_USERS,justify=RIGHT) for _ in range(3)]
         user_labels = [tk.Label(frame, text= x.heater) for x in [self.user1, self.user2, self.user3]]
 
         #Kueche und Bad Lable und Entries anzeigen
@@ -62,9 +78,9 @@ class Main(tk.Frame):
                 lables_bath[cnt].grid(row= 4, column=i)
 
             else:
-                entries_kitchen[cnt].grid(row=2, column=i)
+                self.entries_kitchen[cnt].grid(row=2, column=i)
                 kitchenprev[cnt].grid(row=3, column=i, sticky=tk.E)
-                entries_bath[cnt].grid(row=4, column=i)
+                self.entries_bath[cnt].grid(row=4, column=i)
                 bathprev[cnt].grid(row=5, column=i, sticky=tk.E)
                 cnt += 1
 
@@ -72,13 +88,13 @@ class Main(tk.Frame):
         cnt = 0
         for i in range(6,11,2):
             einzel_lables[cnt].grid(row=i, column=0)
-            einzel_entries[cnt].grid(row=i, column=2)
+            self.einzel_entries[cnt].grid(row=i, column=2)
             user_labels[cnt].grid(row=i+1, column= 2, sticky=tk.E)
             cnt+=1
 
-        def save():
+        def save(self):
             #pickleaufbau: 1 liste mit 3 dicts mit je 2 listen einträgen: zählerstände + differences
-            for i, x in enumerate(entries_kitchen):
+            for i, x in enumerate(self.entries_kitchen):
                 val = int(x.get())
                 if i == 0:
                     self.kitchen.warm_set(val)
@@ -87,7 +103,7 @@ class Main(tk.Frame):
                 else:
                     self.kitchen.heater_set(val)
 
-            for i, x in enumerate(entries_bath):
+            for i, x in enumerate(self.entries_bath):
                 val = int(x.get())
                 if i == 0:
                     self.bath.warm_set(val)
@@ -96,7 +112,7 @@ class Main(tk.Frame):
                 else:
                     self.bath.heater_set(val)
             
-            for i, x in enumerate(einzel_entries):
+            for i, x in enumerate(self.einzel_entries):
                 val = int(x.get())
                 if i == 0:
                     self.user1.heater_set(val)
@@ -109,28 +125,28 @@ class Main(tk.Frame):
             file = open('aktuelle_stats', 'wb')
             pickle.dump(final_lis, file)
             file.close()
-            
-        def clear():
-            for x in entries_kitchen:
+                
+        def clear(self):
+            for x in self.entries_kitchen:
                 x.delete(0,END)
-            for x in entries_bath:
+            for x in self.entries_bath:
                 x.delete(0,END)
-            for x in einzel_entries:
+            for x in self.einzel_entries:
                 x.delete(0,END)
         
-        def show():
+        def show(self):
             print('show')
 
         #buttons
         btn_frame = tk.Frame(self.root,background= 'blue')
-        btn_frame.grid(row=12, column=1)
+        btn_frame.grid(row=2, column=1)
         save_btn = tk.Button(btn_frame, text='Save', background= DARK_USERS, command= save)
         save_btn.grid(row=0,column=0)
         clear_btn = tk.Button(btn_frame, text='Clear', background= DARK_USERS, command= clear)
         clear_btn.grid(row=0, column=1)
         show_btn = tk.Button(btn_frame, text= 'ShowStats' , background= DARK_USERS, command=show)
         show_btn.grid(row= 0, column= 2)
-        quit_btn = tk.Button(btn_frame, text= 'Quit', background='red', command= self.root.destroy)
+        quit_btn = tk.Button(btn_frame, text= 'Quit', background=WHITE, foreground=RED, command= self.root.destroy)
         quit_btn.grid(row= 0 , column=3)
 
 
